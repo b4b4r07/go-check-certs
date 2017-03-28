@@ -18,6 +18,7 @@ import (
 )
 
 const defaultConcurrency = 8
+const defaultPort = "443"
 
 const (
 	errExpiringShortly = "%s: ** '%s' (S/N %X) expires in %d hours! **"
@@ -181,6 +182,9 @@ func checkHost(host string) hostResult {
 }
 
 func checkVerifiedHost(host string) (result hostResult) {
+	if !strings.HasSuffix(host, ":"+defaultPort) {
+		host += ":" + defaultPort
+	}
 	result = hostResult{
 		host:  host,
 		certs: []certErrors{},
