@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -81,10 +82,6 @@ type hostResult struct {
 func main() {
 	flag.Parse()
 
-	if len(*hostsFile) == 0 {
-		flag.Usage()
-		return
-	}
 	if *warnYears < 0 {
 		*warnYears = 0
 	}
@@ -141,11 +138,14 @@ func queueHosts(done <-chan struct{}) <-chan string {
 	hosts := make(chan string)
 	go func() {
 		defer close(hosts)
-
 		fileContents, err := ioutil.ReadFile(*hostsFile)
 		if err != nil {
-			return
+			fileContents, err = ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
+
 		lines := strings.Split(string(fileContents), "\n")
 		for _, line := range lines {
 			host := strings.TrimSpace(line)
